@@ -20,19 +20,13 @@ class ApiService {
     _token = token;
   }
   
-  // --- MÉTODO PARA CERRAR SESIÓN ---
   Future<void> logout() async {
     await _loadToken();
     if (_token == null) return;
-
     await http.post(
       Uri.parse('$_baseUrl/logout'),
-      headers: {
-        'Accept': 'application/json',
-        'Authorization': 'Bearer $_token',
-      },
+      headers: {'Accept': 'application/json', 'Authorization': 'Bearer $_token'},
     );
-
     final prefs = await SharedPreferences.getInstance();
     await prefs.remove('auth_token');
     _token = null;
@@ -44,7 +38,6 @@ class ApiService {
       headers: {'Content-Type': 'application/json', 'Accept': 'application/json'},
       body: jsonEncode({'email': email, 'password': password}),
     );
-
     if (response.statusCode == 200) {
       final data = jsonDecode(response.body);
       if (data['status'] == 'success' && data['token'] != null) {
@@ -59,11 +52,7 @@ class ApiService {
     final response = await http.post(
       Uri.parse('$_baseUrl/register'),
       headers: {'Content-Type': 'application/json', 'Accept': 'application/json'},
-      body: jsonEncode({
-        'name': name,
-        'email': email,
-        'password': password,
-      }),
+      body: jsonEncode({'name': name, 'email': email, 'password': password}),
     );
     return response.statusCode == 201;
   }
@@ -71,16 +60,10 @@ class ApiService {
   Future<Map<String, dynamic>> getDashboardData() async {
     await _loadToken();
     if (_token == null) throw Exception('Token no encontrado');
-
     final response = await http.get(
       Uri.parse('$_baseUrl/dashboard'),
-      headers: {
-        'Content-Type': 'application/json',
-        'Accept': 'application/json',
-        'Authorization': 'Bearer $_token',
-      },
+      headers: {'Accept': 'application/json', 'Authorization': 'Bearer $_token'},
     );
-
     if (response.statusCode == 200) {
       return jsonDecode(response.body);
     } else {
@@ -91,20 +74,10 @@ class ApiService {
   Future<bool> addMonthlyIncome(String amount) async {
     await _loadToken();
     if (_token == null) return false;
-
     final response = await http.post(
       Uri.parse('$_baseUrl/transactions'),
-      headers: {
-        'Content-Type': 'application/json',
-        'Accept': 'application/json',
-        'Authorization': 'Bearer $_token',
-      },
-      body: jsonEncode({
-        'description': 'Ingreso Mensual',
-        'amount': amount,
-        'date': DateFormat('yyyy-MM-dd').format(DateTime.now()),
-        'type': 'ingreso',
-      }),
+      headers: {'Content-Type': 'application/json', 'Accept': 'application/json', 'Authorization': 'Bearer $_token'},
+      body: jsonEncode({'description': 'Ingreso Mensual', 'amount': amount, 'date': DateFormat('yyyy-MM-dd').format(DateTime.now()), 'type': 'ingreso'}),
     );
     return response.statusCode == 201;
   }
@@ -112,16 +85,10 @@ class ApiService {
   Future<List<dynamic>> getTransactions() async {
     await _loadToken();
     if (_token == null) return [];
-
     final response = await http.get(
       Uri.parse('$_baseUrl/transactions'),
-      headers: {
-        'Content-Type': 'application/json',
-        'Accept': 'application/json',
-        'Authorization': 'Bearer $_token',
-      },
+      headers: {'Accept': 'application/json', 'Authorization': 'Bearer $_token'},
     );
-
     if (response.statusCode == 200) {
       final Map<String, dynamic> body = jsonDecode(response.body);
       return body['data'] as List<dynamic>;
@@ -132,16 +99,10 @@ class ApiService {
   Future<List<dynamic>> getCategories() async {
     await _loadToken();
     if (_token == null) return [];
-
     final response = await http.get(
       Uri.parse('$_baseUrl/categories'),
-      headers: {
-        'Content-Type': 'application/json',
-        'Accept': 'application/json',
-        'Authorization': 'Bearer $_token',
-      },
+      headers: {'Accept': 'application/json', 'Authorization': 'Bearer $_token'},
     );
-
     if (response.statusCode == 200) {
       final Map<String, dynamic> body = jsonDecode(response.body);
       return body['data'] as List<dynamic>;
@@ -152,34 +113,47 @@ class ApiService {
   Future<bool> storeTransaction(Map<String, dynamic> transactionData) async {
     await _loadToken();
     if (_token == null) return false;
-
     final response = await http.post(
       Uri.parse('$_baseUrl/transactions'),
-      headers: {
-        'Content-Type': 'application/json',
-        'Accept': 'application/json',
-        'Authorization': 'Bearer $_token',
-      },
+      headers: {'Content-Type': 'application/json', 'Accept': 'application/json', 'Authorization': 'Bearer $_token'},
       body: jsonEncode(transactionData),
     );
-
     return response.statusCode == 201;
   }
 
   Future<bool> storeCategory(Map<String, dynamic> categoryData) async {
     await _loadToken();
     if (_token == null) return false;
-
     final response = await http.post(
       Uri.parse('$_baseUrl/categories'),
-      headers: {
-        'Content-Type': 'application/json',
-        'Accept': 'application/json',
-        'Authorization': 'Bearer $_token',
-      },
+      headers: {'Content-Type': 'application/json', 'Accept': 'application/json', 'Authorization': 'Bearer $_token'},
       body: jsonEncode(categoryData),
     );
+    return response.statusCode == 201;
+  }
 
+  // --- NUEVOS MÉTODOS PARA SUGERENCIAS ---
+  Future<List<dynamic>> getCategorySuggestions() async {
+    await _loadToken();
+    if (_token == null) return [];
+    final response = await http.get(
+      Uri.parse('$_baseUrl/categories/suggestions'),
+      headers: {'Accept': 'application/json', 'Authorization': 'Bearer $_token'},
+    );
+    if (response.statusCode == 200) {
+      return jsonDecode(response.body);
+    }
+    return [];
+  }
+
+  Future<bool> storeSelectedSuggestions(List<dynamic> categories) async {
+    await _loadToken();
+    if (_token == null) return false;
+    final response = await http.post(
+      Uri.parse('$_baseUrl/categories/suggestions'),
+      headers: {'Content-Type': 'application/json', 'Accept': 'application/json', 'Authorization': 'Bearer $_token'},
+      body: jsonEncode({'categories': categories}),
+    );
     return response.statusCode == 201;
   }
 }

@@ -5,7 +5,7 @@ import 'package:intl/intl.dart';
 import 'package:fl_chart/fl_chart.dart';
 import '../services/api_service.dart';
 import 'home_screen.dart'; // Para usar GlassCard
-import 'login_screen.dart'; // Para navegar al login
+import 'login_screen.dart';
 
 class DashboardPage extends StatefulWidget {
   const DashboardPage({super.key});
@@ -30,9 +30,13 @@ class _DashboardPageState extends State<DashboardPage> {
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
-      builder: (ctx) => Container(
-         margin: const EdgeInsets.all(16),
-         child: GlassCard(
+      builder: (ctx) => BackdropFilter(
+        filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
+        child: Container(
+          decoration: BoxDecoration(
+            color: Colors.white.withOpacity(0.9),
+            borderRadius: const BorderRadius.vertical(top: Radius.circular(30)),
+          ),
           child: Padding(
             padding: EdgeInsets.only(
               bottom: MediaQuery.of(ctx).viewInsets.bottom,
@@ -43,19 +47,28 @@ class _DashboardPageState extends State<DashboardPage> {
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                Text('Añadir Ingreso Mensual', style: GoogleFonts.manrope(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.white)),
+                Text('Añadir Ingreso Mensual', 
+                  style: GoogleFonts.manrope(
+                    fontSize: 18, 
+                    fontWeight: FontWeight.bold, 
+                    color: Colors.blueGrey.shade800
+                  )
+                ),
                 const SizedBox(height: 16),
-                TextField(
-                  controller: _incomeController,
-                  style: const TextStyle(color: Colors.white),
-                  keyboardType: const TextInputType.numberWithOptions(decimal: true),
-                  decoration: InputDecoration(
-                    labelText: 'Monto',
-                    labelStyle: TextStyle(color: Colors.white.withOpacity(0.7)),
-                    prefixText: '\$ ',
-                    prefixStyle: const TextStyle(color: Colors.white),
-                    enabledBorder: UnderlineInputBorder(borderSide: BorderSide(color: Colors.white.withOpacity(0.5))),
-                    focusedBorder: const UnderlineInputBorder(borderSide: BorderSide(color: Colors.white)),
+                GlassCard(
+                  borderRadius: 12.0,
+                  padding: const EdgeInsets.symmetric(horizontal: 12),
+                  child: TextField(
+                    controller: _incomeController,
+                    keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                    style: GoogleFonts.manrope(color: Colors.blueGrey.shade800),
+                    decoration: InputDecoration(
+                      border: InputBorder.none,
+                      labelText: 'Monto',
+                      labelStyle: GoogleFonts.manrope(color: Colors.blueGrey.shade600),
+                      prefixText: '\$ ',
+                      prefixStyle: GoogleFonts.manrope(color: Colors.blueGrey.shade800),
+                    ),
                   ),
                 ),
                 const SizedBox(height: 24),
@@ -76,11 +89,19 @@ class _DashboardPageState extends State<DashboardPage> {
                     }
                   },
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(0xFF3D99F5),
+                    backgroundColor: Colors.blueGrey.shade800,
+                    foregroundColor: Colors.white,
                     padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 24),
                     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12.0)),
+                    elevation: 0,
+                    shadowColor: Colors.transparent,
                   ),
-                  child: const Text('Guardar Ingreso', style: TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.bold)),
+                  child: Text('Guardar Ingreso', 
+                    style: GoogleFonts.manrope(
+                      fontSize: 16, 
+                      fontWeight: FontWeight.bold
+                    )
+                  ),
                 ),
                 const SizedBox(height: 20),
               ],
@@ -107,24 +128,46 @@ class _DashboardPageState extends State<DashboardPage> {
       future: _dashboardDataFuture,
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
-          return const Center(child: CircularProgressIndicator(color: Colors.white));
+          return Center(
+            child: GlassCard(
+              borderRadius: 100,
+              padding: const EdgeInsets.all(20),
+              child: const CircularProgressIndicator(
+                valueColor: AlwaysStoppedAnimation<Color>(Colors.blueGrey),
+              ),
+            )
+          );
         }
         if (snapshot.hasError || !snapshot.hasData) {
           return Center(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                const Text('Error al cargar los datos', style: TextStyle(color: Colors.white)),
-                const SizedBox(height: 10),
-                ElevatedButton(
-                  onPressed: () {
-                    setState(() {
-                      _dashboardDataFuture = _apiService.getDashboardData();
-                    });
-                  },
-                  child: const Text('Reintentar'),
-                )
-              ],
+            child: GlassCard(
+              padding: const EdgeInsets.all(20),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  const Icon(Icons.error_outline, size: 40, color: Colors.blueGrey),
+                  const SizedBox(height: 16),
+                  Text('Error al cargar los datos', 
+                    style: GoogleFonts.manrope(color: Colors.blueGrey.shade800)
+                  ),
+                  const SizedBox(height: 16),
+                  ElevatedButton(
+                    onPressed: () {
+                      setState(() {
+                        _dashboardDataFuture = _apiService.getDashboardData();
+                      });
+                    },
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.blueGrey.shade800,
+                      foregroundColor: Colors.white,
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                    ),
+                    child: Text('Reintentar', 
+                      style: GoogleFonts.manrope(fontWeight: FontWeight.w500)
+                    ),
+                  )
+                ],
+              ),
             ),
           );
         }
@@ -146,7 +189,7 @@ class _DashboardPageState extends State<DashboardPage> {
   }
 }
 
-// --- VISTA 1: Recordatorio para añadir Ingresos ---
+// --- VISTA 1: Recordatorio para añadir Ingresos (MODERNIZADA) ---
 class IncomeReminderView extends StatelessWidget {
   final String userName;
   final VoidCallback onAddIncome;
@@ -159,86 +202,81 @@ class IncomeReminderView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Stack(
-      children: [
-        SafeArea(
-          child: Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
+    return SafeArea(
+      child: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    IconButton(
-                      icon: const Icon(Icons.menu, color: Colors.white),
-                      onPressed: () { /* Lógica para abrir menú lateral */ },
-                    ),
-                    Text(
-                      'Resumen',
-                      style: GoogleFonts.manrope(
-                        fontSize: 18,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.white,
-                      ),
-                    ),
-                    const SizedBox(width: 48),
-                  ],
+                IconButton(
+                  icon: Icon(Icons.menu, color: Colors.blueGrey.shade800),
+                  onPressed: () { /* Lógica para abrir menú lateral */ },
                 ),
-                const SizedBox(height: 32),
                 Text(
-                  'Bienvenido, $userName',
+                  'Resumen',
                   style: GoogleFonts.manrope(
-                    fontSize: 28,
+                    fontSize: 18,
                     fontWeight: FontWeight.bold,
-                    color: Colors.white,
+                    color: Colors.blueGrey.shade800,
                   ),
                 ),
-                const SizedBox(height: 16),
-                Text(
-                  "No has registrado tus ingresos de este mes aún. Por favor añade tu ingreso mensual para empezar a usar la aplicación.",
-                  style: GoogleFonts.manrope(
-                    fontSize: 16,
-                    color: Colors.white.withOpacity(0.8),
-                  ),
-                ),
-                const Spacer(),
+                const SizedBox(width: 48),
               ],
             ),
-          ),
-        ),
-        Positioned(
-          bottom: 16,
-          left: 16,
-          right: 16,
-          child: SizedBox(
-            width: double.infinity,
-            child: ElevatedButton(
-              onPressed: onAddIncome,
-              style: ElevatedButton.styleFrom(
-                backgroundColor: const Color(0xFF3D99F5),
-                padding: const EdgeInsets.symmetric(vertical: 16),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12.0),
-                ),
+            const SizedBox(height: 32),
+            Text(
+              'Bienvenido, $userName',
+              style: GoogleFonts.manrope(
+                fontSize: 28,
+                fontWeight: FontWeight.bold,
+                color: Colors.blueGrey.shade800,
               ),
+            ),
+            const SizedBox(height: 16),
+            GlassCard(
               child: Text(
-                'Añadir Ingreso Mensual',
+                "No has registrado tus ingresos de este mes aún. Por favor añade tu ingreso mensual para empezar a usar la aplicación.",
                 style: GoogleFonts.manrope(
-                  color: Colors.white,
                   fontSize: 16,
-                  fontWeight: FontWeight.bold,
+                  color: Colors.blueGrey.shade700,
                 ),
               ),
             ),
-          ),
+            const Spacer(),
+            SizedBox(
+              width: double.infinity,
+              child: ElevatedButton(
+                onPressed: onAddIncome,
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.blueGrey.shade800,
+                  foregroundColor: Colors.white,
+                  padding: const EdgeInsets.symmetric(vertical: 16),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12.0),
+                  ),
+                  elevation: 0,
+                ),
+                child: Text(
+                  'Añadir Ingreso Mensual',
+                  style: GoogleFonts.manrope(
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ),
+            ),
+            const SizedBox(height: 16),
+          ],
         ),
-      ],
+      ),
     );
   }
 }
 
-// --- VISTA 2: Dashboard Principal ---
+// --- VISTA 2: Dashboard Principal (MODERNIZADA) ---
 class DashboardView extends StatelessWidget {
   final Map<String, dynamic> dashboardData;
   final VoidCallback onLogout;
@@ -261,29 +299,30 @@ class DashboardView extends StatelessWidget {
     return SingleChildScrollView(
       child: SafeArea(
         child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16.0),
+          padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Padding(
-                padding: const EdgeInsets.symmetric(vertical: 8.0),
+              GlassCard(
+                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     CircleAvatar(
                       backgroundImage: NetworkImage(dashboardData['userAvatarUrl'] ?? 'https://via.placeholder.com/100/e7edf4/49739c?text=U'),
                       radius: 20,
+                      backgroundColor: Colors.blueGrey.shade100,
                     ),
                     Text(
                       'Panel de Control',
                       style: GoogleFonts.manrope(
                         fontSize: 18,
                         fontWeight: FontWeight.bold,
-                        color: Colors.white,
+                        color: Colors.blueGrey.shade800,
                       ),
                     ),
                     IconButton(
-                      icon: const Icon(Icons.logout, color: Colors.white),
+                      icon: Icon(Icons.logout, color: Colors.blueGrey.shade800),
                       onPressed: onLogout,
                     ),
                   ],
@@ -295,20 +334,19 @@ class DashboardView extends StatelessWidget {
                 style: GoogleFonts.manrope(
                   fontSize: 22,
                   fontWeight: FontWeight.bold,
-                  color: Colors.white,
+                  color: Colors.blueGrey.shade800,
                 ),
               ),
               const SizedBox(height: 16),
               GlassCard(
-                child: Padding(
-                  padding: const EdgeInsets.all(16.0),
-                  child: Column(
-                    children: [
-                     _buildSummaryRow('Ingresos Totales', _safeConvertToDouble(dashboardData['totalIncome']), currencyFormat),
-                      _buildSummaryRow('Gastos Totales', _safeConvertToDouble(dashboardData['totalExpenses']), currencyFormat),
-                      _buildSummaryRow('Balance Actual', _safeConvertToDouble(dashboardData['balance']), currencyFormat),
-                    ],
-                  ),
+                child: Column(
+                  children: [
+                    _buildSummaryRow('Ingresos Totales', _safeConvertToDouble(dashboardData['totalIncome']), currencyFormat),
+                    const SizedBox(height: 12),
+                    _buildSummaryRow('Gastos Totales', _safeConvertToDouble(dashboardData['totalExpenses']), currencyFormat),
+                    const SizedBox(height: 12),
+                    _buildSummaryRow('Balance Actual', _safeConvertToDouble(dashboardData['balance']), currencyFormat),
+                  ],
                 ),
               ),
               const SizedBox(height: 32),
@@ -317,36 +355,36 @@ class DashboardView extends StatelessWidget {
                 style: GoogleFonts.manrope(
                   fontSize: 22,
                   fontWeight: FontWeight.bold,
-                  color: Colors.white,
+                  color: Colors.blueGrey.shade800,
                 ),
               ),
               const SizedBox(height: 16),
-              GlassCard(child: _buildBudgetUsageSection(dashboardData, currencyFormat)), // <-- Se pasa el formateador
+              _buildBudgetUsageSection(dashboardData, currencyFormat),
               const SizedBox(height: 32),
               Text(
                 'Gastos Diarios',
                 style: GoogleFonts.manrope(
                   fontSize: 22,
                   fontWeight: FontWeight.bold,
-                  color: Colors.white,
+                  color: Colors.blueGrey.shade800,
                 ),
               ),
               const SizedBox(height: 16),
-              GlassCard(child: _buildDailySpendingSection(dashboardData)),
+              _buildDailySpendingSection(dashboardData),
               const SizedBox(height: 32),
               Text(
                 'Categorías con Más Gastos',
                 style: GoogleFonts.manrope(
                   fontSize: 22,
                   fontWeight: FontWeight.bold,
-                  color: Colors.white,
+                  color: Colors.blueGrey.shade800,
                 ),
               ),
               const SizedBox(height: 16),
               ...?(dashboardData['topCategories'] as List?)?.map((category) {
                 return Padding(
                   padding: const EdgeInsets.only(bottom: 8.0),
-                  child: GlassCard(child: _buildCategoryRow(category['name'], _safeConvertToDouble(category['total']), currencyFormat)),
+                  child: _buildCategoryRow(category['name'], _safeConvertToDouble(category['total']), currencyFormat),
                 );
               }).toList(),
               const SizedBox(height: 32),
@@ -358,28 +396,25 @@ class DashboardView extends StatelessWidget {
   }
 
   Widget _buildSummaryRow(String title, double amount, NumberFormat format) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 8.0),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          Text(
-            title,
-            style: GoogleFonts.manrope(
-              fontSize: 16,
-              color: Colors.white.withOpacity(0.8),
-            ),
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        Text(
+          title,
+          style: GoogleFonts.manrope(
+            fontSize: 16,
+            color: Colors.blueGrey.shade700,
           ),
-          Text(
-            format.format(amount),
-            style: GoogleFonts.manrope(
-              fontSize: 16,
-              fontWeight: FontWeight.w500,
-              color: Colors.white,
-            ),
+        ),
+        Text(
+          format.format(amount),
+          style: GoogleFonts.manrope(
+            fontSize: 16,
+            fontWeight: FontWeight.w500,
+            color: Colors.blueGrey.shade800,
           ),
-        ],
-      ),
+        ),
+      ],
     );
   }
 
@@ -390,44 +425,44 @@ class DashboardView extends StatelessWidget {
       case 'arriendo / hipoteca':
       case 'servicios públicos':
       case 'salud':
-        iconData = Icons.home;
+        iconData = Icons.home_outlined;
         break;
       case 'transporte':
-        iconData = Icons.directions_car;
+        iconData = Icons.directions_car_outlined;
         break;
       case 'restaurantes':
-        iconData = Icons.restaurant;
+        iconData = Icons.restaurant_outlined;
         break;
       case 'entretenimiento':
-        iconData = Icons.movie;
+        iconData = Icons.movie_outlined;
         break;
       case 'compras (ropa, etc.)':
-        iconData = Icons.shopping_bag;
+        iconData = Icons.shopping_bag_outlined;
         break;
       case 'viajes':
-        iconData = Icons.flight;
+        iconData = Icons.flight_takeoff_outlined;
         break;
       case 'ahorro a largo plazo':
       case 'inversiones':
       case 'pago de deudas':
-        iconData = Icons.savings;
+        iconData = Icons.savings_outlined;
         break;
       default:
-        iconData = Icons.shopping_cart;
+        iconData = Icons.shopping_cart_outlined;
     }
 
-    return Padding(
-      padding: const EdgeInsets.all(12.0),
+    return GlassCard(
+      padding: const EdgeInsets.all(12),
       child: Row(
         children: [
           Container(
             width: 50,
             height: 50,
             decoration: BoxDecoration(
-              color: Colors.white.withOpacity(0.2),
+              color: Colors.blueGrey.shade100,
               borderRadius: BorderRadius.circular(12),
             ),
-            child: Icon(iconData, color: Colors.white),
+            child: Icon(iconData, color: Colors.blueGrey.shade800),
           ),
           const SizedBox(width: 16),
           Expanded(
@@ -439,14 +474,14 @@ class DashboardView extends StatelessWidget {
                   style: GoogleFonts.manrope(
                     fontSize: 16,
                     fontWeight: FontWeight.bold,
-                    color: Colors.white,
+                    color: Colors.blueGrey.shade800,
                   ),
                 ),
                 Text(
                   format.format(amount),
                   style: GoogleFonts.manrope(
                     fontSize: 14,
-                    color: Colors.white.withOpacity(0.8),
+                    color: Colors.blueGrey.shade600,
                   ),
                 ),
               ],
@@ -457,7 +492,7 @@ class DashboardView extends StatelessWidget {
     );
   }
 
-  Widget _buildBudgetUsageSection(Map<String, dynamic> data, NumberFormat format) { // <-- Recibe el formateador
+  Widget _buildBudgetUsageSection(Map<String, dynamic> data, NumberFormat format) {
     final totalIncome = _safeConvertToDouble(data['totalIncome']);
     final totalExpenses = _safeConvertToDouble(data['totalExpenses']);
     
@@ -473,31 +508,41 @@ class DashboardView extends StatelessWidget {
     final wantsBudget = totalIncome * 0.2;
     final savingsBudget = totalIncome * 0.3;
 
-    return Padding(
-      padding: const EdgeInsets.all(16.0),
+    return GlassCard(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
             'Regla 50/20/30',
-            style: GoogleFonts.manrope(fontSize: 16, fontWeight: FontWeight.w500, color: Colors.white),
+            style: GoogleFonts.manrope(
+              fontSize: 16, 
+              fontWeight: FontWeight.w500, 
+              color: Colors.blueGrey.shade800
+            ),
           ),
           const SizedBox(height: 8),
           Text(
             '${totalIncome > 0 ? ((totalExpenses / totalIncome) * 100).toStringAsFixed(0) : 0}%',
-            style: GoogleFonts.manrope(fontSize: 32, fontWeight: FontWeight.bold, color: Colors.white),
+            style: GoogleFonts.manrope(
+              fontSize: 32, 
+              fontWeight: FontWeight.bold, 
+              color: Colors.blueGrey.shade800
+            ),
           ),
           const SizedBox(height: 4),
           Text(
             'Utilizado',
-            style: GoogleFonts.manrope(fontSize: 16, color: Colors.white.withOpacity(0.8)),
+            style: GoogleFonts.manrope(
+              fontSize: 16, 
+              color: Colors.blueGrey.shade600
+            ),
           ),
           const SizedBox(height: 16),
-          _buildProgressBar("Necesidades", needsSpent, needsBudget, Colors.lightBlue.shade200, Colors.red.shade400, format),
+          _buildProgressBar("Necesidades", needsSpent, needsBudget, Colors.blueGrey.shade300, Colors.red.shade300, format),
           const SizedBox(height: 16),
-          _buildProgressBar("Deseos", wantsSpent, wantsBudget, Colors.amber.shade200, Colors.red.shade400, format),
+          _buildProgressBar("Deseos", wantsSpent, wantsBudget, Colors.blueGrey.shade300, Colors.red.shade300, format),
           const SizedBox(height: 16),
-          _buildProgressBar("Ahorros", savingsSpent, savingsBudget, Colors.teal.shade200, Colors.red.shade400, format),
+          _buildProgressBar("Ahorros", savingsSpent, savingsBudget, Colors.blueGrey.shade300, Colors.red.shade300, format),
         ],
       ),
     );
@@ -517,11 +562,18 @@ class DashboardView extends StatelessWidget {
           children: [
             Text(
               title,
-              style: GoogleFonts.manrope(fontSize: 13, fontWeight: FontWeight.bold, color: Colors.white.withOpacity(0.8)),
+              style: GoogleFonts.manrope(
+                fontSize: 13, 
+                fontWeight: FontWeight.bold, 
+                color: Colors.blueGrey.shade700
+              ),
             ),
-             Text(
+            Text(
               'Gastado: ${format.format(spent)} / Rec: ${format.format(budget)}',
-              style: GoogleFonts.manrope(fontSize: 12, color: Colors.white.withOpacity(0.7)),
+              style: GoogleFonts.manrope(
+                fontSize: 12, 
+                color: Colors.blueGrey.shade600
+              ),
             ),
           ],
         ),
@@ -531,7 +583,7 @@ class DashboardView extends StatelessWidget {
           child: LinearProgressIndicator(
             value: displayFactor,
             minHeight: 8,
-            backgroundColor: Colors.white.withOpacity(0.2),
+            backgroundColor: Colors.blueGrey.shade100,
             valueColor: AlwaysStoppedAnimation<Color>(barColor),
           ),
         ),
@@ -540,7 +592,11 @@ class DashboardView extends StatelessWidget {
             padding: const EdgeInsets.only(top: 4.0),
             child: Text(
               '¡Has excedido el presupuesto en esta categoría!',
-              style: GoogleFonts.manrope(fontSize: 12, color: overspentColor, fontWeight: FontWeight.bold),
+              style: GoogleFonts.manrope(
+                fontSize: 12, 
+                color: overspentColor, 
+                fontWeight: FontWeight.bold
+              ),
             ),
           ),
       ],
@@ -566,24 +622,34 @@ class DashboardView extends StatelessWidget {
         spots.add(FlSpot(i.toDouble(), amount));
     }
 
-    return Padding(
-      padding: const EdgeInsets.all(16.0),
+    return GlassCard(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
             'Gastos Diarios',
-            style: GoogleFonts.manrope(fontSize: 16, fontWeight: FontWeight.w500, color: Colors.white),
+            style: GoogleFonts.manrope(
+              fontSize: 16, 
+              fontWeight: FontWeight.w500, 
+              color: Colors.blueGrey.shade800
+            ),
           ),
           const SizedBox(height: 8),
           Text(
             currencyFormat.format(totalExpenses),
-            style: GoogleFonts.manrope(fontSize: 32, fontWeight: FontWeight.bold, color: Colors.white),
+            style: GoogleFonts.manrope(
+              fontSize: 32, 
+              fontWeight: FontWeight.bold, 
+              color: Colors.blueGrey.shade800
+            ),
           ),
           const SizedBox(height: 4),
           Text(
             'Este Mes',
-            style: GoogleFonts.manrope(fontSize: 16, color: Colors.white.withOpacity(0.8)),
+            style: GoogleFonts.manrope(
+              fontSize: 16, 
+              color: Colors.blueGrey.shade600
+            ),
           ),
           const SizedBox(height: 24),
           SizedBox(
@@ -603,7 +669,7 @@ class DashboardView extends StatelessWidget {
                     spots: spots,
                     isCurved: true,
                     gradient: LinearGradient(
-                      colors: [Colors.amber.shade300, Colors.pink.shade300],
+                      colors: [Colors.blueGrey.shade400, Colors.blueGrey.shade600],
                     ),
                     barWidth: 4,
                     isStrokeCapRound: true,
@@ -612,8 +678,8 @@ class DashboardView extends StatelessWidget {
                       show: true,
                       gradient: LinearGradient(
                         colors: [
-                          Colors.amber.withOpacity(0.3),
-                          Colors.pink.withOpacity(0.0),
+                          Colors.blueGrey.withOpacity(0.3),
+                          Colors.blueGrey.withOpacity(0.0),
                         ],
                         begin: Alignment.topCenter,
                         end: Alignment.bottomCenter,
@@ -628,13 +694,13 @@ class DashboardView extends StatelessWidget {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceAround,
             children: [
-              Text('1', style: GoogleFonts.manrope(fontSize: 13, fontWeight: FontWeight.bold, color: Colors.white.withOpacity(0.8))),
-              Text('5', style: GoogleFonts.manrope(fontSize: 13, fontWeight: FontWeight.bold, color: Colors.white.withOpacity(0.8))),
-              Text('10', style: GoogleFonts.manrope(fontSize: 13, fontWeight: FontWeight.bold, color: Colors.white.withOpacity(0.8))),
-              Text('15', style: GoogleFonts.manrope(fontSize: 13, fontWeight: FontWeight.bold, color: Colors.white.withOpacity(0.8))),
-              Text('20', style: GoogleFonts.manrope(fontSize: 13, fontWeight: FontWeight.bold, color: Colors.white.withOpacity(0.8))),
-              Text('25', style: GoogleFonts.manrope(fontSize: 13, fontWeight: FontWeight.bold, color: Colors.white.withOpacity(0.8))),
-              Text('30', style: GoogleFonts.manrope(fontSize: 13, fontWeight: FontWeight.bold, color: Colors.white.withOpacity(0.8))),
+              Text('1', style: GoogleFonts.manrope(fontSize: 13, fontWeight: FontWeight.bold, color: Colors.blueGrey.shade600)),
+              Text('5', style: GoogleFonts.manrope(fontSize: 13, fontWeight: FontWeight.bold, color: Colors.blueGrey.shade600)),
+              Text('10', style: GoogleFonts.manrope(fontSize: 13, fontWeight: FontWeight.bold, color: Colors.blueGrey.shade600)),
+              Text('15', style: GoogleFonts.manrope(fontSize: 13, fontWeight: FontWeight.bold, color: Colors.blueGrey.shade600)),
+              Text('20', style: GoogleFonts.manrope(fontSize: 13, fontWeight: FontWeight.bold, color: Colors.blueGrey.shade600)),
+              Text('25', style: GoogleFonts.manrope(fontSize: 13, fontWeight: FontWeight.bold, color: Colors.blueGrey.shade600)),
+              Text('30', style: GoogleFonts.manrope(fontSize: 13, fontWeight: FontWeight.bold, color: Colors.blueGrey.shade600))
             ],
           ),
         ],
